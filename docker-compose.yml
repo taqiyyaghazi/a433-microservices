@@ -1,0 +1,24 @@
+# Use version 3.7 of Docker Compose
+version: '3.7'
+
+services:
+  # Create service item-app
+  item-app:
+    # Use image taqiyyaghazi/item-app:v1 from Docker Hub
+    image: taqiyyaghazi/item-app:v1
+    # Mapping port 8080 to port 80
+    ports:
+      - '80:8080'
+    # Specify that the "item-app" service should only start after the "item-db" service has been launched
+    depends_on:
+      - item-db
+  # Create service item-db
+  item-db:
+    # Use image mongo:3 from Docker Hub
+    image: mongo:3
+    # Create a volume "app-db" with a target of "/data/db" in the container
+    volumes:
+      - app-db:/data/db
+# It has one volume named app-db
+volumes:
+  app-db:
