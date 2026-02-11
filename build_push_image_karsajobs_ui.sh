@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Build Docker image
-docker build -t taqiyyaghazi/karsajobs-ui:latest .
+docker build -t ghcr.io/taqiyyaghazi/karsajobs-ui:latest .
 
-# Log in to Docker Hub
-echo $PASSWORD_DOCKER_HUB | docker login -u taqiyyaghazi --password-stdin
+# Log in to GitHub Container Registry
+echo $CR_PAT | docker login ghcr.io -u taqiyyaghazi --password-stdin
 
-# Push image to Docker Hub
-docker push taqiyyaghazi/karsajobs-ui:latest
+# Push image to GitHub Container Registry
+docker push ghcr.io/taqiyyaghazi/karsajobs-ui:latest
 
