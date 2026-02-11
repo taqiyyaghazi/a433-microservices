@@ -6,11 +6,11 @@ docker build -t item-app:v1 .
 # List all local images
 docker images
 
-# Tag the image with the format for Docker Hub
-docker tag item-app:v1 taqiyyaghazi/item-app:v1
+# Tag the image with the format for GitHub Packages
+docker tag item-app:v1 ghcr.io/taqiyyaghazi/item-app:v1
 
-# Login to Docker Hub
-echo $PASSWORD_DOCKER_HUB | docker login -u taqiyyaghazi --password-stdin
+# Login to GitHub Packages
+echo $CR_PAT | docker login ghcr.io -u taqiyyaghazi --password-stdin
 
-# Push the image to Docker Hub
-docker push taqiyyaghazi/item-app:v1
+# Push the image to GitHub Packages
+docker push ghcr.io/taqiyyaghazi/item-app:v1
