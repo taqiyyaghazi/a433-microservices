@@ -4,8 +4,8 @@ version: '3.7'
 services:
   # Create service item-app
   item-app:
-    # Use image taqiyyaghazi/item-app:v1 from Docker Hub
-    image: taqiyyaghazi/item-app:v1
+    # Use image ghcr.io/taqiyyaghazi/item-app:v1 from GitHub Packages
+    image: ghcr.io/taqiyyaghazi/item-app:v1
     # Mapping port 8080 to port 80
     ports:
       - '80:8080'
