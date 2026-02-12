@@ -1,0 +1,55 @@
+version: 2.1
+
+executors:
+  docker-executor:
+    docker:
+      - image: cimg/base:stable
+  go-executor:
+    docker:
+      - image: cimg/go:1.15
+
+jobs:
+  lint-dockerfile:
+    executor: docker-executor
+    steps:
+      - checkout
+      - run:
+          name: Install hadolint
+          command: |
+            sudo curl -L https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64 -o /usr/local/bin/hadolint
+            sudo chmod +x /usr/local/bin/hadolint
+      - run:
+          name: Run hadolint
+          command: hadolint Dockerfile
+
+  test-app:
+    executor: go-executor
+    steps:
+      - checkout
+      - run:
+          name: Run unit tests
+          command: go test -v -short --count=1 $(go list ./...)
+
+  build-app-karsajobs:
+    executor: docker-executor
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build and Push Docker image
+          command: |
+            chmod +x build_push_image_karsajobs.sh
+            ./build_push_image_karsajobs.sh
+
+workflows:
+  karsajobs-workflow:
+    jobs:
+      - lint-dockerfile
+      - test-app
+      - build-app-karsajobs:
+          requires:
+            - lint-dockerfile
+            - test-app
+          filters:
+            branches:
+              only: karsajobs
