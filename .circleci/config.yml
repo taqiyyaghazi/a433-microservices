@@ -1,55 +1,105 @@
-version: 2.1 # Versi konfigurasi CircleCI yang digunakan
+# Versi konfigurasi CircleCI yang digunakan
+version: 2.1
 
-executors: # Definisi lingkungan eksekusi yang dapat digunakan kembali
-  docker-executor: # Nama executor untuk Docker umum
-    docker: # Menggunakan executor Docker
-      - image: cimg/base:stable # Image dasar Linux yang stabil
-  go-executor: # Nama executor khusus untuk Golang
-    docker: # Menggunakan executor Docker
-      - image: cimg/go:1.15 # Image Golang versi 1.15
+# Definisi lingkungan eksekusi yang dapat digunakan kembali
+executors: 
+  # Nama executor untuk Docker umum
+  docker-executor: 
+    # Menggunakan executor Docker
+    docker: 
+      # Image dasar Linux yang stabil
+      - image: cimg/base:stable 
+  # Nama executor khusus untuk Golang
+  go-executor: 
+    # Menggunakan executor Docker
+    docker: 
+      # Image Golang versi 1.15
+      - image: cimg/go:1.15 
 
-jobs: # Daftar pekerjaan (jobs) yang akan dijalankan
-  lint-dockerfile: # Job pertama: Memeriksa kualitas Dockerfile
-    executor: docker-executor # Menggunakan executor docker-executor
-    steps: # Langkah-langkah dalam job ini
-      - checkout # Mengambil kode sumber dari repositori
-      - run: # Menjalankan perintah shell
-          name: Install hadolint # Nama langkah: Instalasi hadolint
-          command: | # Blok perintah multi-line
-            sudo curl -L https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64 -o /usr/local/bin/hadolint # Mengunduh binary hadolint
-            sudo chmod +x /usr/local/bin/hadolint # Memberikan izin eksekusi ke hadolint
-      - run: # Menjalankan perintah shell
-          name: Run hadolint # Nama langkah: Menjalankan hadolint
-          command: hadolint Dockerfile # Memeriksa file Dockerfile dengan hadolint
+# Daftar jobs yang akan dijalankan
+jobs: 
+  # Job pertama: Memeriksa kualitas Dockerfile
+  lint-dockerfile: 
+    # Menggunakan executor docker-executor
+    executor: docker-executor 
+    # Langkah-langkah dalam job ini
+    steps: 
+      # Mengambil kode sumber dari repositori
+      - checkout 
+      # Menjalankan perintah shell
+      - run: 
+          # Nama langkah: Instalasi hadolint
+          name: Install hadolint 
+          # Blok perintah multi-line
+          command: | 
+            # Mengunduh binary hadolint
+            sudo curl -L https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64 -o /usr/local/bin/hadolint 
+            # Memberikan izin eksekusi ke hadolint
+            sudo chmod +x /usr/local/bin/hadolint 
+      # Menjalankan perintah shell
+      - run: 
+          # Nama langkah: Menjalankan hadolint
+          name: Run hadolint 
+          # Memeriksa file Dockerfile dengan hadolint
+          command: hadolint Dockerfile 
 
-  test-app: # Job kedua: Menjalankan unit test aplikasi
-    executor: go-executor # Menggunakan executor go-executor
-    steps: # Langkah-langkah dalam job ini
-      - checkout # Mengambil kode sumber dari repositori
-      - run: # Menjalankan perintah shell
-          name: Run unit tests # Nama langkah: Menjalankan unit tests
-          command: go test -v -short --count=1 $(go list ./...) # Perintah untuk menjalankan test Go
+  # Job kedua: Menjalankan unit test aplikasi
+  test-app: 
+    # Menggunakan executor go-executor
+    executor: go-executor 
+    # Langkah-langkah dalam job ini
+    steps: 
+      # Mengambil kode sumber dari repositori
+      - checkout 
+      # Menjalankan perintah shell
+      - run: 
+          # Nama langkah: Menjalankan unit tests
+          name: Run unit tests 
+          # Perintah untuk menjalankan test Go
+          command: go test -v -short --count=1 $(go list ./...) 
 
-  build-app-karsajobs: # Job ketiga: Membangun dan push image Docker
-    executor: docker-executor # Menggunakan executor docker-executor
-    steps: # Langkah-langkah dalam job ini
-      - checkout # Mengambil kode sumber dari repositori
-      - setup_remote_docker # Menyiapkan lingkungan Docker remote untuk build image
-      - run: # Menjalankan perintah shell
-          name: Build and Push Docker image # Nama langkah: Build dan Push image
-          command: | # Blok perintah multi-line
-            chmod +x build_push_image_karsajobs.sh # Memberikan izin eksekusi ke script
-            ./build_push_image_karsajobs.sh # Menjalankan script build dan push
+  # Job ketiga: Membangun dan push image Docker
+  build-app-karsajobs: 
+    # Menggunakan executor docker-executor
+    executor: docker-executor 
+    # Langkah-langkah dalam job ini
+    steps: 
+      # Mengambil kode sumber dari repositori
+      - checkout 
+      # Menyiapkan lingkungan Docker remote untuk build image
+      - setup_remote_docker 
+      # Menjalankan perintah shell
+      - run: 
+          # Nama langkah: Build dan Push image
+          name: Build and Push Docker image 
+          # Blok perintah multi-line
+          command: | 
+            # Memberikan izin eksekusi ke script
+            chmod +x build_push_image_karsajobs.sh 
+            # Menjalankan script build dan push
+            ./build_push_image_karsajobs.sh 
 
-workflows: # Definisi alur kerja (pipeline)
-  karsajobs-workflow: # Nama workflow
-    jobs: # Daftar job yang akan dijalankan dalam workflow ini
-      - lint-dockerfile # Menjalankan job lint-dockerfile
-      - test-app # Menjalankan job test-app
-      - build-app-karsajobs: # Menjalankan job build-app-karsajobs
-          requires: # Menentukan dependensi (syarat) job ini
-            - lint-dockerfile # Harus sukses menjalankan lint-dockerfile dulu
-            - test-app # Harus sukses menjalankan test-app dulu
-          filters: # Filter untuk menentukan kapan job ini berjalan
-            branches: # Filter berdasarkan branch
-              only: karsajobs # Hanya berjalan jika push ke branch 'karsajobs'
+# Definisi alur kerja (pipeline)
+workflows: 
+  # Nama workflow
+  karsajobs-workflow: 
+    # Daftar job yang akan dijalankan dalam workflow ini
+    jobs: 
+      # Menjalankan job lint-dockerfile
+      - lint-dockerfile 
+      # Menjalankan job test-app
+      - test-app 
+      # Menjalankan job build-app-karsajobs
+      - build-app-karsajobs: 
+          # Menentukan dependensi (syarat) job ini
+          requires: 
+            # Harus sukses menjalankan lint-dockerfile dulu
+            - lint-dockerfile 
+            # Harus sukses menjalankan test-app dulu
+            - test-app 
+          # Filter untuk menentukan kapan job ini berjalan
+          filters: 
+            # Filter berdasarkan branch
+            branches: 
+              # Hanya berjalan jika push ke branch 'karsajobs'
+              only: karsajobs 
