@@ -1,42 +1,80 @@
-version: 2.1 # Versi konfigurasi CircleCI yang digunakan
+# Versi konfigurasi CircleCI yang digunakan
+version: 2.1 
 
-executors: # Definisi reusable environment untuk menjalankan jobs
-  docker-executor: # Nama executor yang kita buat
-    docker: # Menentukan bahwa executor ini menggunakan container Docker
-      - image: cimg/base:stable # Image docker dasar yang digunakan sebagai lingkungan eksekusi
+# Definisi reusable environment untuk menjalankan jobs
+executors: 
+  # Nama executor yang kita buat
+  docker-executor: 
+    # Menentukan bahwa executor ini menggunakan container Docker
+    docker: 
+      # Image docker dasar yang digunakan sebagai lingkungan eksekusi
+      - image: cimg/base:stable 
 
-jobs: # Bagian untuk mendefinisikan tugas-tugas (jobs) individual
-  lint-dockerfile: # Definisi job pertama bernama 'lint-dockerfile'
-    executor: docker-executor # Menggunakan executor 'docker-executor' yang didefinisikan di atas
-    steps: # Langkah-langkah yang akan dieksekusi dalam job ini
-      - checkout # Langkah built-in untuk mengambil kode dari repository (git clone)
-      - run: # Langkah untuk menjalankan perintah shell
-          name: Install hadolint # Nama langkah ini yang akan muncul di dashboard CircleCI
-          command: | # Blok perintah multi-baris untuk menginstal linter
-            sudo curl -L https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64 -o /usr/local/bin/hadolint # Mengunduh binary hadolint
-            sudo chmod +x /usr/local/bin/hadolint # Memberikan izin eksekusi pada binary hadolint
-      - run: # Langkah shell berikutnya
-          name: Run hadolint # Nama langkah linting
-          command: hadolint Dockerfile # Menjalankan hadolint untuk memeriksa file Dockerfile
+# Bagian untuk mendefinisikan jobs
+jobs: 
+  # Definisi job pertama bernama 'lint-dockerfile'
+  lint-dockerfile: 
+    # Menggunakan executor 'docker-executor' yang didefinisikan di atas
+    executor: docker-executor 
+    # Langkah-langkah yang akan dieksekusi dalam job ini
+    steps: 
+      # Langkah built-in untuk mengambil kode dari repository
+      - checkout 
+      # Langkah untuk menjalankan perintah shell
+      - run: 
+          # Nama langkah
+          name: Install hadolint 
+          # Blok perintah multi-baris untuk menginstal linter
+          command: | 
+            # Mengunduh binary hadolint
+            sudo curl -L https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64 -o /usr/local/bin/hadolint 
+            # Memberikan izin eksekusi pada binary hadolint
+            sudo chmod +x /usr/local/bin/hadolint 
+      # Langkah shell berikutnya
+      - run: 
+          # Nama langkah linting
+          name: Run hadolint 
+          # Menjalankan hadolint untuk memeriksa file Dockerfile
+          command: hadolint Dockerfile 
 
-  build-app-karsajobs-ui: # Definisi job kedua bernama 'build-app-karsajobs-ui'
-    executor: docker-executor # Menggunakan executor yang sama
-    steps: # Langkah-langkah untuk job ini
-      - checkout # Mengambil kode sumber terbaru
-      - setup_remote_docker # Menyiapkan lingkungan docker terisolasi untuk menjalankan perintah docker build/push
-      - run: # Langkah shell untuk build dan push
-          name: Build and Push Docker image # Nama langkah build
-          command: | # Blok perintah multi-baris
-            chmod +x build_push_image_karsajobs_ui.sh # Memberikan izin eksekusi pada script build
-            ./build_push_image_karsajobs_ui.sh # Menjalankan script untuk build dan push image
+  # Definisi job kedua bernama 'build-app-karsajobs-ui'
+  build-app-karsajobs-ui: 
+    # Menggunakan executor yang sama
+    executor: docker-executor 
+    # Langkah-langkah untuk job ini
+    steps: 
+      # Mengambil kode sumber terbaru
+      - checkout 
+      # Menyiapkan lingkungan docker terisolasi untuk menjalankan perintah docker build/push
+      - setup_remote_docker 
+      # Langkah shell untuk build dan push
+      - run: 
+          # Nama langkah build
+          name: Build and Push Docker image 
+          # Blok perintah multi-baris
+          command: | 
+            # Memberikan izin eksekusi pada script build
+            chmod +x build_push_image_karsajobs_ui.sh 
+            # Menjalankan script untuk build dan push image
+            ./build_push_image_karsajobs_ui.sh 
 
-workflows: # Bagian untuk mengatur urutan dan aturan eksekusi job
-  karsajobs-ui-workflow: # Nama workflow
-    jobs: # Daftar job yang termasuk dalam workflow ini
-      - lint-dockerfile # Menjalankan job lint-dockerfile pertama kali
-      - build-app-karsajobs-ui: # Menjalankan job build-app-karsajobs-ui
-          requires: # Menetapkan dependensi
-            - lint-dockerfile # Job ini HANYA akan jalan jika 'lint-dockerfile' sukses
-          filters: # Menetapkan kondisi kapan job ini berjalan
-            branches: # Filter berdasarkan nama branch
-              only: karsajobs-ui # Workflow ini HANYA berjalan jika ada push ke branch 'karsajobs-ui'
+# Bagian untuk mengatur urutan dan aturan eksekusi job
+workflows: 
+  # Nama workflow
+  karsajobs-ui-workflow: 
+    # Daftar job yang termasuk dalam workflow ini
+    jobs: 
+      # Menjalankan job lint-dockerfile pertama kali
+      - lint-dockerfile 
+      # Menjalankan job build-app-karsajobs-ui
+      - build-app-karsajobs-ui: 
+          # Menetapkan dependensi
+          requires: 
+            # Job ini HANYA akan jalan jika 'lint-dockerfile' sukses
+            - lint-dockerfile 
+          # Menetapkan kondisi kapan job ini berjalan
+          filters: 
+            # Filter berdasarkan nama branch
+            branches: 
+              # Workflow ini HANYA berjalan jika ada push ke branch 'karsajobs-ui'
+              only: karsajobs-ui 
