@@ -13,8 +13,8 @@ RUN npm ci --only=production
 COPY --chown=node:node . .
 
 # Expose the application port (defaulting to 3000)
-ENV PORT=3000
-EXPOSE 3000
+ENV PORT=3001
+EXPOSE 3001
 
 # Use non-root user for security
 USER node
